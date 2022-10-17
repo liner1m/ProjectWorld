@@ -56,7 +56,7 @@ void APlanet::CreateAllChunks()
 
 	//FVector::Dist(MyCharacterPosOnCube, FVector(Radius, -Radius + Radius * 2 * i, -Radius + Radius * 2 * j))
 
-	CreateSquare(FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius * 2, 0, 0);
+	CreateSquare(FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius, 0, 0);
 	
 	
 
@@ -89,19 +89,25 @@ void APlanet::CreateAllChunks()
 	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, FString::Printf(TEXT("PosSnap: %s"), *MyCharacterWorldPosOnGrid.ToString()));
 }
 
-int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPosition, const float SquareSize, const int32 CurrentDivide, int32 LastVertex)
+int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 CurrentDivide, int32 LastVertex)
 {
 	if (CurrentDivide < LODsAmount)
 	{
-		const float HalfSquareSize = SquareSize / 2;
+		const float HalfSquareRadius = SquareRadius / 2;
 
-		if (SquarePosition.Y < PointPosition.Y || SquarePosition.Z < PointPosition.Z) // Right - Down
+		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
+			FVector2D(SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), HalfSquareRadius)) // Right - Down
+		{
+			// Recursive Self
+			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);
+		}
+		else
 		{
 			// Create Vertices
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z - HalfSquareSize));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - HalfSquareSize, SquarePosition.Z - HalfSquareSize));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z - SquareRadius));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - SquareRadius, SquarePosition.Z - SquareRadius));
 			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - HalfSquareSize, SquarePosition.Z));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - SquareRadius, SquarePosition.Z));
 
 			// Create Triangles
 			Triangles.Add(LastVertex + 0);
@@ -115,18 +121,19 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 			// Increase LastVertex
 			LastVertex += 4;
 		}
-		else
+
+		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
+			FVector2D(SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), HalfSquareRadius)) // Left - Down
 		{
 			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareSize / 2, SquarePosition.Z - HalfSquareSize / 2), PointPosition, HalfSquareSize, CurrentDivide + 1, LastVertex);
+			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);
 		}
-
-		if (SquarePosition.Y > PointPosition.Y || SquarePosition.Z < PointPosition.Z) // Left - Down
+		else
 		{
 			// Create Vertices
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + HalfSquareSize, SquarePosition.Z - HalfSquareSize));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z - HalfSquareSize));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + HalfSquareSize, SquarePosition.Z));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + SquareRadius, SquarePosition.Z - SquareRadius));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z - SquareRadius));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + SquareRadius, SquarePosition.Z));
 			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z));
 
 			// Create Triangles
@@ -141,19 +148,20 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 			// Increase LastVertex
 			LastVertex += 4;
 		}
-		else
+
+		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
+			FVector2D(SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), HalfSquareRadius)) // Right - Up
 		{
 			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareSize / 2, SquarePosition.Z - HalfSquareSize / 2), PointPosition, HalfSquareSize, CurrentDivide + 1, LastVertex);
+			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);			
 		}
-
-		if (SquarePosition.Y <= PointPosition.Y || SquarePosition.Z >= PointPosition.Z) // Right - Up
+		else
 		{
 			// Create Vertices
 			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - HalfSquareSize, SquarePosition.Z));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z + HalfSquareSize));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - HalfSquareSize, SquarePosition.Z + HalfSquareSize));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - SquareRadius, SquarePosition.Z));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z + SquareRadius));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - SquareRadius, SquarePosition.Z + SquareRadius));
 
 			// Create Triangles
 			Triangles.Add(LastVertex + 0);
@@ -167,19 +175,20 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 			// Increase LastVertex
 			LastVertex += 4;
 		}
-		else
+
+		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
+			FVector2D(SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), HalfSquareRadius)) // Left - Up
 		{
 			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareSize / 2, SquarePosition.Z + HalfSquareSize / 2), PointPosition, HalfSquareSize, CurrentDivide + 1, LastVertex);
+			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);
 		}
-
-		if (SquarePosition.Y >= PointPosition.Y || SquarePosition.Z >= PointPosition.Z) // Left - Up
+		else
 		{
 			// Create Vertices
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + HalfSquareSize, SquarePosition.Z));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + SquareRadius, SquarePosition.Z));
 			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + HalfSquareSize, SquarePosition.Z + HalfSquareSize));
-			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z + HalfSquareSize));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + SquareRadius, SquarePosition.Z + SquareRadius));
+			Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y, SquarePosition.Z + SquareRadius));
 
 			// Create Triangles
 			Triangles.Add(LastVertex + 0);
@@ -193,11 +202,26 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 			// Increase LastVertex
 			LastVertex += 4;
 		}
-		else
-		{
-			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareSize / 2, SquarePosition.Z + HalfSquareSize / 2), PointPosition, HalfSquareSize, CurrentDivide + 1, LastVertex);
-		}
+	}
+	else 
+	{
+		// Create Vertices
+		Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + SquareRadius, SquarePosition.Z - SquareRadius));
+		Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - SquareRadius, SquarePosition.Z - SquareRadius));
+		Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y + SquareRadius, SquarePosition.Z + SquareRadius));
+		Vertices.Add(FVector(SquarePosition.X, SquarePosition.Y - SquareRadius, SquarePosition.Z + SquareRadius));
+
+		// Create Triangles
+		Triangles.Add(LastVertex + 0);
+		Triangles.Add(LastVertex + 1);
+		Triangles.Add(LastVertex + 2);
+
+		Triangles.Add(LastVertex + 1);
+		Triangles.Add(LastVertex + 3);
+		Triangles.Add(LastVertex + 2);
+
+		// Increase LastVertex
+		LastVertex += 4;
 	}
 
 	return LastVertex;
@@ -291,6 +315,19 @@ void APlanet::ClearPlanet()
 	UVs.Empty();
 }
 
+
+bool APlanet::IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius)
+{
+	bool IsCollided = false;
+
+	if ((FMath::Abs(Square1Center.X - Square2Center.X) <= Square1Radius + Square2Radius) &&
+		(FMath::Abs(Square1Center.Y - Square2Center.Y) <= Square1Radius + Square2Radius))
+	{
+		IsCollided = true;
+	}
+
+	return IsCollided;
+}
 
 FVector APlanet::ProjectToCubeTowardsCenter(const FVector Vector, const int32 CubeRadius)
 {
