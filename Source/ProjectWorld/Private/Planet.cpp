@@ -56,7 +56,7 @@ void APlanet::CreateAllChunks()
 
 	//FVector::Dist(MyCharacterPosOnCube, FVector(Radius, -Radius + Radius * 2 * i, -Radius + Radius * 2 * j))
 
-	CreateSquare(FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius, 0, 0);
+	CreateSquare(FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, 0);
 	
 	
 
@@ -89,17 +89,26 @@ void APlanet::CreateAllChunks()
 	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, FString::Printf(TEXT("PosSnap: %s"), *MyCharacterWorldPosOnGrid.ToString()));
 }
 
-int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 CurrentDivide, int32 LastVertex)
+int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex)
 {
-	if (CurrentDivide < LODsAmount)
+	if (CurrentDivide < MaxDivide)
 	{
 		const float HalfSquareRadius = SquareRadius / 2;
 
 		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
 			FVector2D(SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), HalfSquareRadius)) // Right - Down
 		{
-			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);
+			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
+				FVector2D(SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), HalfSquareRadius)) // Right - Down
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+			}
+			else
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+			}
 		}
 		else
 		{
@@ -125,8 +134,17 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
 			FVector2D(SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), HalfSquareRadius)) // Left - Down
 		{
-			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);
+			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
+				FVector2D(SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), HalfSquareRadius)) // Left - Down
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+			}
+			else
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+			}
 		}
 		else
 		{
@@ -152,8 +170,17 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
 			FVector2D(SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), HalfSquareRadius)) // Right - Up
 		{
-			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);			
+			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
+				FVector2D(SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), HalfSquareRadius)) // Right - Up
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+			}
+			else
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+			}
 		}
 		else
 		{
@@ -179,8 +206,17 @@ int32 APlanet::CreateSquare(const FVector SquarePosition, const FVector PointPos
 		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
 			FVector2D(SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), HalfSquareRadius)) // Left - Up
 		{
-			// Recursive Self
-			LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, CurrentDivide + 1, LastVertex);
+			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
+				FVector2D(SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), HalfSquareRadius)) // Left - Up
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+			}
+			else
+			{
+				// Recursive Self
+				LastVertex = CreateSquare(FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius), PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+			}
 		}
 		else
 		{

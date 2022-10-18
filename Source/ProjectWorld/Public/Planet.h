@@ -39,7 +39,7 @@ private:
 	void CreatePlanet();
 	void CreateAllChunks();
 	void CreateChunk(const int32 LODNumber);
-	int32 CreateSquare(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 CurrentDivide, int32 LastVertex);
+	int32 CreateSquare(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex);
 	void ClearPlanet();
 
 	bool IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius);
