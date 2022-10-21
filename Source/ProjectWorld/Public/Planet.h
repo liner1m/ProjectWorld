@@ -37,10 +37,10 @@ private:
 	TArray<FVector2D> UVs;
 
 	void CreatePlanet();
-	//void CreateAllChunks();
-	//void CreateChunk(const int32 LODNumber);
-	int32 CreateAllChunks(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex);
-	int32 CreateChunk(const FVector ChunkPosition, const FVector ChunkNormal, const float ChunkRadius, const int32 Lod, const int32 StartVertex);
+	int32 CreatePlanetSide(const FVector2D SquarePosition2D, const FVector SquareNormal, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex);
+	int32 CreateChunk(const FVector2D ChunkPosition2D, const FVector ChunkNormal, const float ChunkRadius, const int32 Lod, const int32 StartVertex);
+	FVector Vector2DTo3DByNormal(const FVector2D Vector2D, const FVector Normal);
+	FVector2D Vector3DTo2DByNormal(const FVector Vector3D, const FVector Normal);
 	void ClearPlanet();
 
 	bool IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius);

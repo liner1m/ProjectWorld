@@ -41,7 +41,15 @@ void APlanet::CreatePlanet()
 
 	ClearPlanet();
 
-	CreateAllChunks(FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, 0);
+	// Create Planet Sides
+	int32 LastVertex = 0;
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(-Radius, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, Radius, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, -Radius, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 0, Radius), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 0, -Radius), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+
 	ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
 
 	//Debug
@@ -52,121 +60,115 @@ void APlanet::CreatePlanet()
 	}
 }
 
-int32 APlanet::CreateAllChunks(const FVector SquarePosition, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex)
+int32 APlanet::CreatePlanetSide(const FVector2D SquarePosition2D, const FVector SquareNormal, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex)
 {
 	if (CurrentDivide < MaxDivide)
 	{
 		const float HalfSquareRadius = SquareRadius / 2;
-		FVector ChunkPosition;
+		FVector2D ChunkPosition2D;
+
+		FVector2D LocalPointPosition2D = Vector3DTo2DByNormal(PointPosition, SquareNormal);
 
 		// Right - Down
-		ChunkPosition = FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z - HalfSquareRadius);
-		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
-			FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Right - Down
+		ChunkPosition2D = FVector2D(SquarePosition2D.X - HalfSquareRadius, SquarePosition2D.Y - HalfSquareRadius);
+		if (IsSquaresCollided(LocalPointPosition2D, LoadDistance, ChunkPosition2D, HalfSquareRadius)) // Right - Down
 		{
-			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
-				FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Right - Down
+			if (IsSquaresCollided(LocalPointPosition2D, LoadDistance / 8, ChunkPosition2D, HalfSquareRadius)) // Right - Down
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
 			}
 			else
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
 			}
 		}
 		else
 		{
 			// Create Chunk
-			LastVertex = CreateChunk(ChunkPosition, FVector(1, 0, 0), HalfSquareRadius, 999, LastVertex);
+			LastVertex = CreateChunk(ChunkPosition2D, SquareNormal, HalfSquareRadius, 999, LastVertex);
 		}
 
 		// Left - Down
-		ChunkPosition = FVector(Radius, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z - HalfSquareRadius);
-		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
-			FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Left - Down
+		ChunkPosition2D = FVector2D(SquarePosition2D.X + HalfSquareRadius, SquarePosition2D.Y - HalfSquareRadius);
+		if (IsSquaresCollided(LocalPointPosition2D, LoadDistance, ChunkPosition2D, HalfSquareRadius)) // Left - Down
 		{
-			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
-				FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Left - Down
+			if (IsSquaresCollided(LocalPointPosition2D, LoadDistance / 8, ChunkPosition2D, HalfSquareRadius)) // Left - Down
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
 			}
 			else
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
 			}
 		}
 		else
 		{
 			// Create Chunk
-			LastVertex = CreateChunk(ChunkPosition, FVector(1, 0, 0), HalfSquareRadius, 999, LastVertex);
+			LastVertex = CreateChunk(ChunkPosition2D, SquareNormal, HalfSquareRadius, 999, LastVertex);
 		}
 
 		// Right - Up
-		ChunkPosition = FVector(Radius, SquarePosition.Y - HalfSquareRadius, SquarePosition.Z + HalfSquareRadius);
-		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
-			FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Right - Up
+		ChunkPosition2D = FVector2D(SquarePosition2D.X - HalfSquareRadius, SquarePosition2D.Y + HalfSquareRadius);
+		if (IsSquaresCollided(LocalPointPosition2D, LoadDistance, ChunkPosition2D, HalfSquareRadius)) // Right - Up
 		{
-			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
-				FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Right - Up
+			if (IsSquaresCollided(LocalPointPosition2D, LoadDistance / 8, ChunkPosition2D, HalfSquareRadius)) // Right - Up
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
 			}
 			else
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
 			}
 		}
 		else
 		{
 			// Create Chunk
-			LastVertex = CreateChunk(ChunkPosition, FVector(1, 0, 0), HalfSquareRadius, 999, LastVertex);
+			LastVertex = CreateChunk(ChunkPosition2D, SquareNormal, HalfSquareRadius, 999, LastVertex);
 		}
 
 		// Left - Up
-		ChunkPosition = FVector(SquarePosition.X, SquarePosition.Y + HalfSquareRadius, SquarePosition.Z + HalfSquareRadius);
-		if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance,
-			FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Left - Up
+		ChunkPosition2D = FVector2D(SquarePosition2D.X + HalfSquareRadius, SquarePosition2D.Y + HalfSquareRadius);
+		if (IsSquaresCollided(LocalPointPosition2D, LoadDistance, ChunkPosition2D, HalfSquareRadius)) // Left - Up
 		{
-			if (IsSquaresCollided(FVector2D(PointPosition.Y, PointPosition.Z), LoadDistance / 8,
-				FVector2D(ChunkPosition.Y, ChunkPosition.Z), HalfSquareRadius)) // Left - Up
+			if (IsSquaresCollided(LocalPointPosition2D, LoadDistance / 8, ChunkPosition2D, HalfSquareRadius)) // Left - Up
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount, CurrentDivide + 1, LastVertex);
 			}
 			else
 			{
 				// Recursive Self
-				LastVertex = CreateAllChunks(ChunkPosition, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
+				LastVertex = CreatePlanetSide(ChunkPosition2D, SquareNormal, PointPosition, HalfSquareRadius, LODsAmount - 1, CurrentDivide + 1, LastVertex);
 			}
 		}
 		else
 		{
 			// Create Chunk
-			LastVertex = CreateChunk(ChunkPosition, FVector(1, 0, 0), HalfSquareRadius, 999, LastVertex);
+			LastVertex = CreateChunk(ChunkPosition2D, SquareNormal, HalfSquareRadius, 999, LastVertex);
 		}
 	}
 	else 
 	{
 		// Create Chunk
-		LastVertex = CreateChunk(SquarePosition, FVector(1, 0, 0), SquareRadius, 999, LastVertex);
+		LastVertex = CreateChunk(SquarePosition2D, SquareNormal, SquareRadius, 999, LastVertex);
 	}
 
 	return LastVertex;
 }
 
-int32 APlanet::CreateChunk(const FVector ChunkPosition, const FVector ChunkNormal, const float ChunkRadius, const int32 Lod, const int32 StartVertex)
+int32 APlanet::CreateChunk(const FVector2D ChunkPosition2D, const FVector ChunkNormal, const float ChunkRadius, const int32 Lod, const int32 StartVertex)
 {
 	// Create vertices
-	Vertices.Add(FVector(ChunkPosition.X, ChunkPosition.Y + ChunkRadius, ChunkPosition.Z - ChunkRadius));
-	Vertices.Add(FVector(ChunkPosition.X, ChunkPosition.Y - ChunkRadius, ChunkPosition.Z - ChunkRadius));
-	Vertices.Add(FVector(ChunkPosition.X, ChunkPosition.Y + ChunkRadius, ChunkPosition.Z + ChunkRadius));
-	Vertices.Add(FVector(ChunkPosition.X, ChunkPosition.Y - ChunkRadius, ChunkPosition.Z + ChunkRadius));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X + ChunkRadius, ChunkPosition2D.Y - ChunkRadius), ChunkNormal));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X - ChunkRadius, ChunkPosition2D.Y - ChunkRadius), ChunkNormal));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X + ChunkRadius, ChunkPosition2D.Y + ChunkRadius), ChunkNormal));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X - ChunkRadius, ChunkPosition2D.Y + ChunkRadius), ChunkNormal));
 
 	// Create Triangles
 	Triangles.Add(StartVertex + 0);
@@ -178,6 +180,41 @@ int32 APlanet::CreateChunk(const FVector ChunkPosition, const FVector ChunkNorma
 	Triangles.Add(StartVertex + 2);
 
 	return StartVertex + 4;
+}
+
+FVector APlanet::Vector2DTo3DByNormal(const FVector2D Vector2D, const FVector Normal) ///////?????????
+{
+	return Normal.Rotation().RotateVector(FVector(Radius, Vector2D.X, Vector2D.Y));
+}
+
+FVector2D APlanet::Vector3DTo2DByNormal(const FVector Vector3D, const FVector Normal)
+{
+	FVector2D Vector2D = (0, 0, 0);
+	if (Normal.X > 0)
+	{
+		Vector2D = FVector2D(Vector3D.Y, Vector3D.Z);
+	}
+	if (Normal.X < 0)
+	{
+		Vector2D = FVector2D(-Vector3D.Y, Vector3D.Z);
+	}
+	if (Normal.Y > 0)
+	{
+		Vector2D = FVector2D(-Vector3D.X, Vector3D.Z);
+	}
+	if (Normal.Y < 0)
+	{
+		Vector2D = FVector2D(Vector3D.X, Vector3D.Z);
+	}
+	if (Normal.Z > 0)
+	{
+		Vector2D = FVector2D(Vector3D.Y, -Vector3D.X);
+	}
+	if (Normal.Z < 0)
+	{
+		Vector2D = FVector2D(Vector3D.Y, Vector3D.X);
+	}
+	return Vector2D;
 }
 
 void APlanet::ClearPlanet()
