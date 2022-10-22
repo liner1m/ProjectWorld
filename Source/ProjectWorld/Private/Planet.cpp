@@ -37,18 +37,18 @@ void APlanet::Tick(float DeltaTime)
 
 void APlanet::CreatePlanet()
 {	
-	const FVector MyCharacterPosOnCube = MyCharacterPos.BoundToCube(Radius);
+	const FVector MyCharacterPosOnCube = MyCharacterPos;// .BoundToCube(Radius);
 
 	ClearPlanet();
 
 	// Create Planet Sides
 	int32 LastVertex = 0;
-	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(Radius, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
-	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(-Radius, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
-	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, Radius, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
-	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, -Radius, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
-	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 0, Radius), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
-	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 0, -Radius), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(1, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(-1, 0, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 1, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, -1, 0), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 0, 1), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
+	LastVertex = CreatePlanetSide(FVector2D(0, 0), FVector(0, 0, -1), MyCharacterPosOnCube, Radius, LODsAmount, 0, LastVertex);
 
 	ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
 
@@ -67,7 +67,7 @@ int32 APlanet::CreatePlanetSide(const FVector2D SquarePosition2D, const FVector 
 		const float HalfSquareRadius = SquareRadius / 2;
 		FVector2D ChunkPosition2D;
 
-		FVector2D LocalPointPosition2D = Vector3DTo2DByNormal(PointPosition, SquareNormal);
+		FVector2D LocalPointPosition2D = Vector3DToCubeSide2D(PointPosition, FVector(1, 0, 0), SquareNormal);
 
 		// Right - Down
 		ChunkPosition2D = FVector2D(SquarePosition2D.X - HalfSquareRadius, SquarePosition2D.Y - HalfSquareRadius);
@@ -165,10 +165,10 @@ int32 APlanet::CreatePlanetSide(const FVector2D SquarePosition2D, const FVector 
 int32 APlanet::CreateChunk(const FVector2D ChunkPosition2D, const FVector ChunkNormal, const float ChunkRadius, const int32 Lod, const int32 StartVertex)
 {
 	// Create vertices
-	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X + ChunkRadius, ChunkPosition2D.Y - ChunkRadius), ChunkNormal));
-	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X - ChunkRadius, ChunkPosition2D.Y - ChunkRadius), ChunkNormal));
-	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X + ChunkRadius, ChunkPosition2D.Y + ChunkRadius), ChunkNormal));
-	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X - ChunkRadius, ChunkPosition2D.Y + ChunkRadius), ChunkNormal));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X + ChunkRadius, ChunkPosition2D.Y - ChunkRadius), ChunkNormal, Radius));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X - ChunkRadius, ChunkPosition2D.Y - ChunkRadius), ChunkNormal, Radius));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X + ChunkRadius, ChunkPosition2D.Y + ChunkRadius), ChunkNormal, Radius));
+	Vertices.Add(Vector2DTo3DByNormal(FVector2D(ChunkPosition2D.X - ChunkRadius, ChunkPosition2D.Y + ChunkRadius), ChunkNormal, Radius));
 
 	// Create Triangles
 	Triangles.Add(StartVertex + 0);
@@ -182,39 +182,107 @@ int32 APlanet::CreateChunk(const FVector2D ChunkPosition2D, const FVector ChunkN
 	return StartVertex + 4;
 }
 
-FVector APlanet::Vector2DTo3DByNormal(const FVector2D Vector2D, const FVector Normal) ///////?????????
+FVector APlanet::Vector2DTo3DByNormal(const FVector2D Vector2D, const FVector Normal, const float Distance)
 {
-	return Normal.Rotation().RotateVector(FVector(Radius, Vector2D.X, Vector2D.Y));
+	return Normal.Rotation().RotateVector(FVector(Distance, Vector2D.X, Vector2D.Y));
 }
 
-FVector2D APlanet::Vector3DTo2DByNormal(const FVector Vector3D, const FVector Normal)
+FVector2D APlanet::Vector3DToCubeSide2D(FVector Vector3D, const FVector VectorNormal, const FVector PlaneNormal)
 {
-	FVector2D Vector2D = (0, 0, 0);
-	if (Normal.X > 0)
+	FVector Vector2DYZ = FVector(11110,11110,11110); //////?????????
+
+	Vector3D = Vector3D.BoundToCube(Radius); //////?????
+	
+	if (Vector3D.X == Radius) //////?????
 	{
-		Vector2D = FVector2D(Vector3D.Y, Vector3D.Z);
+		if (PlaneNormal == FVector(1, 0, 0))
+		{
+			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
 	}
-	if (Normal.X < 0)
+	if (Vector3D.X == -Radius) //////?????
 	{
-		Vector2D = FVector2D(-Vector3D.Y, Vector3D.Z);
+		if (PlaneNormal == FVector(-1, 0, 0))
+		{
+			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
 	}
-	if (Normal.Y > 0)
+	if (Vector3D.Y == Radius) //////?????
 	{
-		Vector2D = FVector2D(-Vector3D.X, Vector3D.Z);
+		if (PlaneNormal == FVector(0, 1, 0))
+		{
+			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
 	}
-	if (Normal.Y < 0)
+	if (Vector3D.Y == -Radius) //////?????
 	{
-		Vector2D = FVector2D(Vector3D.X, Vector3D.Z);
+		if (PlaneNormal == FVector(0, -1, 0))
+		{
+			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
 	}
-	if (Normal.Z > 0)
+	if (Vector3D.Z == Radius) //////?????
 	{
-		Vector2D = FVector2D(Vector3D.Y, -Vector3D.X);
+		if (PlaneNormal == FVector(0, 0, 1))
+		{
+			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
 	}
-	if (Normal.Z < 0)
+	if (Vector3D.Z == -Radius) //////?????
 	{
-		Vector2D = FVector2D(Vector3D.Y, Vector3D.X);
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
 	}
-	return Vector2D;
+
+	//Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+
+	/*
+	if (PlaneNormal == FVector(-1, 0, 0))
+	{
+		Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+	}
+	if (PlaneNormal == FVector(0, 1, 0))
+	{
+		Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+	}
+	if (PlaneNormal == FVector(0, -1, 0))
+	{
+		Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+	}*/
+	
+
+	/*if (true)
+	{
+		if (VectorNormal.X > 0)
+		{
+			Vector2D = FVector2D(Vector3D.Y, Vector3D.Z);
+		}
+		if (VectorNormal.X < 0)
+		{
+			Vector2D = FVector2D(-Vector3D.Y, Vector3D.Z);
+		}
+		if (VectorNormal.Y > 0)
+		{
+			Vector2D = FVector2D(-Vector3D.X, Vector3D.Z);
+		}
+		if (VectorNormal.Y < 0)
+		{
+			Vector2D = FVector2D(Vector3D.X, Vector3D.Z);
+		}
+		if (VectorNormal.Z > 0)
+		{
+			Vector2D = FVector2D(Vector3D.Y, -Vector3D.X);
+		}
+		if (VectorNormal.Z < 0)
+		{
+			Vector2D = FVector2D(Vector3D.Y, Vector3D.X);
+		}
+	}*/
+
+	
+	return FVector2D(Vector2DYZ.Y, Vector2DYZ.Z);
 }
 
 void APlanet::ClearPlanet()
