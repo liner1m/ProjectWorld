@@ -189,7 +189,7 @@ FVector APlanet::Vector2DTo3DByNormal(const FVector2D Vector2D, const FVector No
 
 FVector2D APlanet::Vector3DToCubeSide2D(FVector Vector3D, const FVector VectorNormal, const FVector PlaneNormal)
 {
-	FVector Vector2DYZ = FVector(11110,11110,11110); //////?????????
+	FVector Vector2DYZ = FVector(0,0,0); //////?????????
 
 	Vector3D = Vector3D.BoundToCube(Radius); //////?????
 	
@@ -199,12 +199,60 @@ FVector2D APlanet::Vector3DToCubeSide2D(FVector Vector3D, const FVector VectorNo
 		{
 			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
 		}
+		if (PlaneNormal == FVector(-1, 0, 0))
+		{
+			Vector2DYZ = FVector(0, Radius * 3, 0); //// ??????
+		}
+		if (PlaneNormal == FVector(0, 1, 0))
+		{
+			Vector2DYZ = FRotator(0, 90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, -1, 0))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, 1))
+		{
+			Vector2DYZ = FRotator(90, 0, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Vector2DYZ.Y, -Radius * 2 + Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = FRotator(-90, 0, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Vector2DYZ.Y, Radius * 2 + Vector2DYZ.Z);
+		}
 	}
 	if (Vector3D.X == -Radius) //////?????
 	{
 		if (PlaneNormal == FVector(-1, 0, 0))
 		{
 			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
+		if (PlaneNormal == FVector(1, 0, 0))
+		{
+			Vector2DYZ = FVector(0, Radius * 3, 0); //// ??????
+		}
+		if (PlaneNormal == FVector(0, -1, 0))
+		{
+			Vector2DYZ = FRotator(0, 90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 1, 0))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, 1))
+		{
+			Vector2DYZ = FRotator(90, 0, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Vector2DYZ.Y, Radius * 2 - Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = FRotator(-90, 0, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Vector2DYZ.Y, -Radius * 2 - Vector2DYZ.Z);
 		}
 	}
 	if (Vector3D.Y == Radius) //////?????
@@ -213,12 +261,60 @@ FVector2D APlanet::Vector3DToCubeSide2D(FVector Vector3D, const FVector VectorNo
 		{
 			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
 		}
+		if (PlaneNormal == FVector(0, -1, 0))
+		{
+			Vector2DYZ = FVector(0, Radius * 3, 0); //// ??????
+		}
+		if (PlaneNormal == FVector(-1, 0, 0))
+		{
+			Vector2DYZ = FRotator(0, 90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(1, 0, 0))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, 1))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
 	}
 	if (Vector3D.Y == -Radius) //////?????
 	{
 		if (PlaneNormal == FVector(0, -1, 0))
 		{
 			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
+		}
+		if (PlaneNormal == FVector(0, 1, 0))
+		{
+			Vector2DYZ = FVector(0, Radius * 3, 0); //// ??????
+		}
+		if (PlaneNormal == FVector(1, 0, 0))
+		{
+			Vector2DYZ = FRotator(0, 90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(-1, 0, 0))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, 1))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 - Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 - Vector2DYZ.Y, Vector2DYZ.Z);
 		}
 	}
 	if (Vector3D.Z == Radius) //////?????
@@ -227,6 +323,30 @@ FVector2D APlanet::Vector3DToCubeSide2D(FVector Vector3D, const FVector VectorNo
 		{
 			Vector2DYZ = PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D);
 		}
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = FVector(0, Radius * 3, 0); //// ??????
+		}
+		if (PlaneNormal == FVector(1, 0, 0))
+		{
+			Vector2DYZ = FRotator(0, 90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(-1, 0, 0))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, Radius * 2 + Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		/*if (PlaneNormal == FVector(0, 0, 1))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 - Vector2DYZ.Y, Vector2DYZ.Z);
+		}
+		if (PlaneNormal == FVector(0, 0, -1))
+		{
+			Vector2DYZ = FRotator(0, -90, 0).RotateVector(PlaneNormal.ToOrientationRotator().GetInverse().RotateVector(Vector3D));
+			Vector2DYZ = FVector(0, -Radius * 2 - Vector2DYZ.Y, Vector2DYZ.Z);
+		}*/
 	}
 	if (Vector3D.Z == -Radius) //////?????
 	{
