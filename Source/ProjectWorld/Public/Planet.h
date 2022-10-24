@@ -37,10 +37,8 @@ private:
 	TArray<FVector2D> UVs;
 
 	void CreatePlanet();
-	int32 CreatePlanetSide(const FVector2D SquarePosition2D, const FVector SquareNormal, const FVector PointPosition, const float SquareRadius, const int32 MaxDivide, const int32 CurrentDivide, int32 LastVertex);
-	int32 CreateChunk(const FVector2D ChunkPosition2D, const FVector ChunkNormal, const float ChunkRadius, const int32 Lod, const int32 StartVertex);
-	FVector Vector2DTo3DByNormal(const FVector2D Vector2D, const FVector Normal, const float Distance);
-	FVector2D Vector3DToCubeSide2D(FVector Vector3D, const FVector VectorNormal, const FVector PlaneNormal);
+	int32 RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPosition, const float QuadRadius, const int32 MaxSubdivision, const int32 CurentSubdivision, int32 VertexCount);
+	int32 CreateChunk(const FVector2D ChunkPosition, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex);
 	void ClearPlanet();
 
 	bool IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius);
@@ -51,7 +49,7 @@ protected:
 	UMaterialInterface* Material;
 
 	UPROPERTY(EditAnywhere)
-	int32 Radius;
+	int32 PlanetRadius;
 
 	UPROPERTY(EditAnywhere)
 	int32 LoadDistance;
