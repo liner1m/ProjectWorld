@@ -71,115 +71,39 @@ int32 APlanet::RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPositio
 		const float HalfQuadRadius = QuadRadius / 2;
 
 		FVector2D SubdividedQuadPosition;
+		int32 MaxPlanetSubdivisionByLoadDistance;
 
 		// Right Down
 		SubdividedQuadPosition = FVector2D(QuadPosition.X - HalfQuadRadius, QuadPosition.Y - HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
+		MaxPlanetSubdivisionByLoadDistance = GetMaxPlanetSubdivisionByLoadDistance(SubdividedQuadPosition, HalfQuadRadius);
+		if (MaxPlanetSubdivisionByLoadDistance)
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 1.5))
-			{
-				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 3))
-				{
-					if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 9))
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision, CurentSubdivision + 1, VertexCount);
-					}
-					else
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 1, CurentSubdivision + 1, VertexCount);
-					}
-				}
-				else
-				{
-					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 2, CurentSubdivision + 1, VertexCount);
-				}
-			}
-			else
-			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 3, CurentSubdivision + 1, VertexCount);
-			}
+			VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, MaxPlanetSubdivisionByLoadDistance, CurentSubdivision + 1, VertexCount);
 		}
+
 		// Left Down
 		SubdividedQuadPosition = FVector2D(QuadPosition.X + HalfQuadRadius, QuadPosition.Y - HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
+		MaxPlanetSubdivisionByLoadDistance = GetMaxPlanetSubdivisionByLoadDistance(SubdividedQuadPosition, HalfQuadRadius);
+		if (MaxPlanetSubdivisionByLoadDistance)
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 1.5))
-			{
-				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 3))
-				{
-					if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 9))
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision, CurentSubdivision + 1, VertexCount);
-					}
-					else
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 1, CurentSubdivision + 1, VertexCount);
-					}
-				}
-				else
-				{
-					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 2, CurentSubdivision + 1, VertexCount);
-				}
-			}
-			else
-			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 3, CurentSubdivision + 1, VertexCount);
-			}
+			VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, MaxPlanetSubdivisionByLoadDistance, CurentSubdivision + 1, VertexCount);
 		}
+
 		// Right Up
 		SubdividedQuadPosition = FVector2D(QuadPosition.X - HalfQuadRadius, QuadPosition.Y + HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
+		MaxPlanetSubdivisionByLoadDistance = GetMaxPlanetSubdivisionByLoadDistance(SubdividedQuadPosition, HalfQuadRadius);
+		if (MaxPlanetSubdivisionByLoadDistance)
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 1.5))
-			{
-				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 3))
-				{
-					if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 9))
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision, CurentSubdivision + 1, VertexCount);
-					}
-					else
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 1, CurentSubdivision + 1, VertexCount);
-					}
-				}
-				else
-				{
-					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 2, CurentSubdivision + 1, VertexCount);
-				}
-			}
-			else
-			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 3, CurentSubdivision + 1, VertexCount);
-			}
+			VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, MaxPlanetSubdivisionByLoadDistance, CurentSubdivision + 1, VertexCount);
 		}
+
 		// Left Up
 		SubdividedQuadPosition = FVector2D(QuadPosition.X + HalfQuadRadius, QuadPosition.Y + HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
+		MaxPlanetSubdivisionByLoadDistance = GetMaxPlanetSubdivisionByLoadDistance(SubdividedQuadPosition, HalfQuadRadius);
+		if (MaxPlanetSubdivisionByLoadDistance)
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 1.5))
-			{
-				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 3))
-				{
-					if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 9))
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision, CurentSubdivision + 1, VertexCount);
-					}
-					else
-					{
-						VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 1, CurentSubdivision + 1, VertexCount);
-					}
-				}
-				else
-				{
-					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 2, CurentSubdivision + 1, VertexCount);
-				}
-			}
-			else
-			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, PlanetSubdivision - 3, CurentSubdivision + 1, VertexCount);
-			}
-		}		
+			VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, MaxPlanetSubdivisionByLoadDistance, CurentSubdivision + 1, VertexCount);
+		}
 	}
 	else
 	{
@@ -271,38 +195,26 @@ void APlanet::ClearPlanet()
 	UVs.Empty();
 }
 
-
+// Change Chunk Quality by Distance
 int32 APlanet::GetMaxPlanetSubdivisionByLoadDistance(const FVector2D QuadPosition, const float QuadRadius)
 {
 	int32 MaxSubdivision = 0;
 
-	if (IsSquaresCollided(QuadPosition, QuadRadius, MyCharacterPos2D(), LoadDistance))
+	float LoadDistanceDivider = 1;
+	for (int32 i = 1; i <= LODsAmount; ++i)
 	{
-		if (IsSquaresCollided(QuadPosition, QuadRadius, MyCharacterPos2D(), LoadDistance / 1.5))
-		{
-			if (IsSquaresCollided(QuadPosition, QuadRadius, MyCharacterPos2D(), LoadDistance / 3))
-			{
-				if (IsSquaresCollided(QuadPosition, QuadRadius, MyCharacterPos2D(), LoadDistance / 9))
-				{
-					MaxSubdivision = PlanetSubdivision - 0;
-				}
-				else
-				{
-					MaxSubdivision = PlanetSubdivision - 1;
-				}
-			}
-			else
-			{
-				MaxSubdivision = PlanetSubdivision - 2;
-			}
-		}
-		else
-		{
-			MaxSubdivision = PlanetSubdivision - 3;
-		}
-	}
+		// Debug
+		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, FString::Printf(TEXT("Point: %f"), LoadDistanceDivider));
 
-	return 1;
+		if (IsSquaresCollided(QuadPosition, QuadRadius, MyCharacterPos2D(), LoadDistance / LoadDistanceDivider))
+		{
+			MaxSubdivision = PlanetSubdivision - LODsAmount + i;
+		}
+
+		LoadDistanceDivider = LoadDistanceDivider * FMath::Pow(1.5, i); //Value for Change Chunk Quality by Distance
+	}
+	
+	return MaxSubdivision;
 }
 
 bool APlanet::IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius)
