@@ -45,23 +45,23 @@ void APlanet::CreatePlanet()
 	// FMath::Clamp LoadDistance
 	float X2PlanetRadius = PlanetRadius * 2;
 	int32 VertexCount = 0;
-	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D().ZeroVector, PlanetRadius, LODsAmount, 0, VertexCount); // Front
-	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(-X2PlanetRadius, 0), PlanetRadius, LODsAmount, 0, VertexCount); // Right
-	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(X2PlanetRadius, 0), PlanetRadius, LODsAmount, 0, VertexCount); // Left
-	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(0, X2PlanetRadius), PlanetRadius, LODsAmount, 0, VertexCount); // Top
-	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(0, -X2PlanetRadius), PlanetRadius, LODsAmount, 0, VertexCount); // Down
+	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D().ZeroVector, 3, PlanetRadius, LODsAmount, 0, VertexCount); // Front
+	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(-X2PlanetRadius, 0), 4, PlanetRadius, LODsAmount, 0, VertexCount); // Right
+	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(X2PlanetRadius, 0), 2, PlanetRadius, LODsAmount, 0, VertexCount); // Left
+	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(0, X2PlanetRadius), 1, PlanetRadius, LODsAmount, 0, VertexCount); // Top
+	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(0, -X2PlanetRadius), 5, PlanetRadius, LODsAmount, 0, VertexCount); // Down
 
 	ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
 
 	//Debug
-	for (auto& el : Vertices)
-	{
-		DrawDebugPoint(GetWorld(), el, 10, FColor().Red, true, false, 1.0f);
-		//GEngine->AddOnScreenDebugMessage(-1, 2000.0f, FColor::Green, FString::Printf(TEXT("Point: %s"), *el.ToString()));
-	}
+	//for (auto& el : Vertices)
+	//{
+	//	DrawDebugPoint(GetWorld(), el, 10, FColor().Red, true, false, 1.0f);
+	//	//GEngine->AddOnScreenDebugMessage(-1, 2000.0f, FColor::Green, FString::Printf(TEXT("Point: %s"), *el.ToString()));
+	//}
 }
 
-int32 APlanet::RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPosition, const float QuadRadius, int32 MaxSubdivision, const int32 CurentSubdivision, int32 VertexCount)
+int32 APlanet::RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPosition, const int32 PlanetSideIndex, const float QuadRadius, int32 MaxSubdivision, const int32 CurentSubdivision, int32 VertexCount)
 {
 	if (CurentSubdivision <= MaxSubdivision)
 	{
@@ -71,72 +71,154 @@ int32 APlanet::RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPositio
 
 		// Right Down
 		SubdividedQuadPosition = FVector2D(QuadPosition.X - HalfQuadRadius, QuadPosition.Y - HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance))
+		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance / 8))
+			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 8))
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 32))
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				}
+				else
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				}
 			}
 			else
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 2, CurentSubdivision + 1, VertexCount);
 			}
 		}
 		// Left Down
 		SubdividedQuadPosition = FVector2D(QuadPosition.X + HalfQuadRadius, QuadPosition.Y - HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance))
+		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance / 8))
+			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 8))
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 32))
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				}
+				else
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				}
 			}
 			else
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 2, CurentSubdivision + 1, VertexCount);
 			}
 		}
 		// Right Up
 		SubdividedQuadPosition = FVector2D(QuadPosition.X - HalfQuadRadius, QuadPosition.Y + HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance))
+		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance / 8))
+			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 8))
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 32))
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				}
+				else
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				}
 			}
 			else
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 2, CurentSubdivision + 1, VertexCount);
 			}
 		}
 		// Left Up
 		SubdividedQuadPosition = FVector2D(QuadPosition.X + HalfQuadRadius, QuadPosition.Y + HalfQuadRadius);
-		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance))
+		if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance))
 		{
-			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, FVector2D(MyCharacterPos.Y, MyCharacterPos.Z), LoadDistance / 8))
+			if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 8))
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				if (IsSquaresCollided(SubdividedQuadPosition, HalfQuadRadius, MyCharacterPos2D(), LoadDistance / 32))
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount, CurentSubdivision + 1, VertexCount);
+				}
+				else
+				{
+					VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				}
 			}
 			else
 			{
-				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, HalfQuadRadius, LODsAmount - 1, CurentSubdivision + 1, VertexCount);
+				VertexCount = RecursiveQuadTreePlanetMeshGeneration(SubdividedQuadPosition, PlanetSideIndex, HalfQuadRadius, LODsAmount - 2, CurentSubdivision + 1, VertexCount);
 			}
 		}		
 	}
 	else
 	{
-		VertexCount = CreateChunk(QuadPosition, QuadRadius, 999, VertexCount);
+		VertexCount = CreateChunk(QuadPosition, PlanetSideIndex, QuadRadius, 999, VertexCount);
 	}
 
 	return VertexCount;
 }
 
-int32 APlanet::CreateChunk(const FVector2D ChunkPosition, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex)
+int32 APlanet::CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex)
 {
+	FVector Vertex0 = FVector(0, ChunkPosition.X + ChunkRadius, ChunkPosition.Y - ChunkRadius);
+	FVector Vertex1 = FVector(0, ChunkPosition.X - ChunkRadius, ChunkPosition.Y - ChunkRadius);
+	FVector Vertex2 = FVector(0, ChunkPosition.X + ChunkRadius, ChunkPosition.Y + ChunkRadius);
+	FVector Vertex3 = FVector(0, ChunkPosition.X - ChunkRadius, ChunkPosition.Y + ChunkRadius);
+
+	float X2PlanetRadius = PlanetRadius * 2;
+	switch (PlanetSideIndex)
+	{
+	case 1: // Up
+		Vertex0 = FRotator(90, 0, 0).RotateVector(Vertex0 - FVector(0, 0, X2PlanetRadius)) + FVector(0, 0, PlanetRadius);
+		Vertex1 = FRotator(90, 0, 0).RotateVector(Vertex1 - FVector(0, 0, X2PlanetRadius)) + FVector(0, 0, PlanetRadius);
+		Vertex2 = FRotator(90, 0, 0).RotateVector(Vertex2 - FVector(0, 0, X2PlanetRadius)) + FVector(0, 0, PlanetRadius);
+		Vertex3 = FRotator(90, 0, 0).RotateVector(Vertex3 - FVector(0, 0, X2PlanetRadius)) + FVector(0, 0, PlanetRadius);
+		break;
+	case 2: // Left
+		Vertex0 = FRotator(0, 90, 0).RotateVector(Vertex0 - FVector(0, X2PlanetRadius, 0)) + FVector(0, PlanetRadius, 0);
+		Vertex1 = FRotator(0, 90, 0).RotateVector(Vertex1 - FVector(0, X2PlanetRadius, 0)) + FVector(0, PlanetRadius, 0);
+		Vertex2 = FRotator(0, 90, 0).RotateVector(Vertex2 - FVector(0, X2PlanetRadius, 0)) + FVector(0, PlanetRadius, 0);
+		Vertex3 = FRotator(0, 90, 0).RotateVector(Vertex3 - FVector(0, X2PlanetRadius, 0)) + FVector(0, PlanetRadius, 0);
+		break;
+	case 3: // Front
+		Vertex0 = Vertex0 + FVector(PlanetRadius, 0, 0);
+		Vertex1 = Vertex1 + FVector(PlanetRadius, 0, 0);
+		Vertex2 = Vertex2 + FVector(PlanetRadius, 0, 0);
+		Vertex3 = Vertex3 + FVector(PlanetRadius, 0, 0);
+		break;
+	case 4: // Right
+		Vertex0 = FRotator(0, -90, 0).RotateVector(Vertex0 + FVector(0, X2PlanetRadius, 0)) - FVector(0, PlanetRadius, 0);
+		Vertex1 = FRotator(0, -90, 0).RotateVector(Vertex1 + FVector(0, X2PlanetRadius, 0)) - FVector(0, PlanetRadius, 0);
+		Vertex2 = FRotator(0, -90, 0).RotateVector(Vertex2 + FVector(0, X2PlanetRadius, 0)) - FVector(0, PlanetRadius, 0);
+		Vertex3 = FRotator(0, -90, 0).RotateVector(Vertex3 + FVector(0, X2PlanetRadius, 0)) - FVector(0, PlanetRadius, 0);
+		break;
+	case 5: // Down
+		Vertex0 = FRotator(-90, 0, 0).RotateVector(Vertex0 + FVector(0, 0, X2PlanetRadius)) - FVector(0, 0, PlanetRadius);
+		Vertex1 = FRotator(-90, 0, 0).RotateVector(Vertex1 + FVector(0, 0, X2PlanetRadius)) - FVector(0, 0, PlanetRadius);
+		Vertex2 = FRotator(-90, 0, 0).RotateVector(Vertex2 + FVector(0, 0, X2PlanetRadius)) - FVector(0, 0, PlanetRadius);
+		Vertex3 = FRotator(-90, 0, 0).RotateVector(Vertex3 + FVector(0, 0, X2PlanetRadius)) - FVector(0, 0, PlanetRadius);
+		break;
+	default:
+		break;
+	}
+
+	// Rotate to CameraPosition
+	Vertex0 = MyCharacterPosToPlanetSideRotation().RotateVector(Vertex0);
+	Vertex1 = MyCharacterPosToPlanetSideRotation().RotateVector(Vertex1);
+	Vertex2 = MyCharacterPosToPlanetSideRotation().RotateVector(Vertex2);
+	Vertex3 = MyCharacterPosToPlanetSideRotation().RotateVector(Vertex3);
+
+	// Convert Cube to Sphere
+	Vertex0 = Vertex0.GetSafeNormal() * PlanetRadius;
+	Vertex1 = Vertex1.GetSafeNormal() * PlanetRadius;
+	Vertex2 = Vertex2.GetSafeNormal() * PlanetRadius;
+	Vertex3 = Vertex3.GetSafeNormal() * PlanetRadius;
+
 	// Create Vertices
-	Vertices.Add(FVector(0, ChunkPosition.X + ChunkRadius, ChunkPosition.Y - ChunkRadius));
-	Vertices.Add(FVector(0, ChunkPosition.X - ChunkRadius, ChunkPosition.Y - ChunkRadius));
-	Vertices.Add(FVector(0, ChunkPosition.X + ChunkRadius, ChunkPosition.Y + ChunkRadius));
-	Vertices.Add(FVector(0, ChunkPosition.X - ChunkRadius, ChunkPosition.Y + ChunkRadius));
+	Vertices.Add(Vertex0);
+	Vertices.Add(Vertex1);
+	Vertices.Add(Vertex2);
+	Vertices.Add(Vertex3);
 
 	// Create Triangles
 	Triangles.Add(StartVertexIndex + 0); //
@@ -170,6 +252,70 @@ bool APlanet::IsSquaresCollided(const FVector2D Square1Center, const float Squar
 	}
 
 	return IsCollided;
+}
+
+FVector2D APlanet::MyCharacterPos2D()
+{
+	FVector2D Vector2D = FVector2D().ZeroVector;
+
+	if (MyCharacterPos.X >= PlanetRadius) // Front
+	{
+		Vector2D = FVector2D(MyCharacterPos.Y, MyCharacterPos.Z);
+	}
+	if (MyCharacterPos.X <= -PlanetRadius) // Back
+	{
+		Vector2D = FVector2D(-MyCharacterPos.Y, MyCharacterPos.Z);
+	}
+	if (MyCharacterPos.Y >= PlanetRadius) // Left
+	{
+		Vector2D = FVector2D(-MyCharacterPos.X, MyCharacterPos.Z);
+	}
+	if (MyCharacterPos.Y <= -PlanetRadius) // Right
+	{
+		Vector2D = FVector2D(MyCharacterPos.X, MyCharacterPos.Z);
+	}
+	if (MyCharacterPos.Z >= PlanetRadius) // Up
+	{
+		Vector2D = FVector2D(MyCharacterPos.Y, -MyCharacterPos.X);
+	}
+	if (MyCharacterPos.Z <= -PlanetRadius) // Down
+	{
+		Vector2D = FVector2D(MyCharacterPos.Y, MyCharacterPos.X);
+	}
+
+	return Vector2D;
+}
+
+FRotator APlanet::MyCharacterPosToPlanetSideRotation()
+{
+	FRotator Rotator = FRotator().ZeroRotator;
+		
+	if (MyCharacterPos.X >= PlanetRadius) // Front
+	{
+		Rotator = FRotator(0, 0, 0);
+	}
+	if (MyCharacterPos.X <= -PlanetRadius) // Back
+	{
+		Rotator = FRotator(0, 180, 0);
+	}
+	if (MyCharacterPos.Y >= PlanetRadius) // Left
+	{
+		Rotator = FRotator(0, 90, 0);
+	}
+	if (MyCharacterPos.Y <= -PlanetRadius) // Right
+	{
+		Rotator = FRotator(0, -90, 0);
+	}
+	if (MyCharacterPos.Z >= PlanetRadius) // Up
+	{
+		Rotator = FRotator(90, 0, 0);
+	}
+	if (MyCharacterPos.Z <= -PlanetRadius) // Down
+	{
+		Rotator = FRotator(-90, 0, 0);
+	}
+
+	return Rotator;
 }
 
 FVector APlanet::ProjectToCubeTowardsCenter(const FVector Vector, const int32 CubeRadius)

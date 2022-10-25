@@ -37,11 +37,15 @@ private:
 	TArray<FVector2D> UVs;
 
 	void CreatePlanet();
-	int32 RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPosition, const float QuadRadius, const int32 MaxSubdivision, const int32 CurentSubdivision, int32 VertexCount);
-	int32 CreateChunk(const FVector2D ChunkPosition, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex);
+	int32 RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPosition, const int32 PlanetSideIndex, const float QuadRadius, const int32 MaxSubdivision, const int32 CurentSubdivision, int32 VertexCount);
+	int32 CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex);
 	void ClearPlanet();
 
 	bool IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius);
+
+	FVector2D MyCharacterPos2D();
+	FRotator MyCharacterPosToPlanetSideRotation();
+
 	FVector ProjectToCubeTowardsCenter(const FVector Vector, const int32 CubeRadius);
 
 protected:
