@@ -41,6 +41,7 @@ private:
 	int32 CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex);
 	void ClearPlanet();
 
+	int32 GetMaxPlanetSubdivisionByLoadDistance(const FVector2D QuadPosition, const float QuadRadius);
 	bool IsSquaresCollided(const FVector2D Square1Center, const float Square1Radius, const FVector2D Square2Center, const float Square2Radius);
 
 	FVector2D MyCharacterPos2D();
@@ -59,7 +60,7 @@ protected:
 	int32 LoadDistance;
 
 	UPROPERTY(EditAnywhere)
-	int32 Density;
+	int32 PlanetSubdivision;
 
 	UPROPERTY(EditAnywhere)
 	int32 LODsAmount;
