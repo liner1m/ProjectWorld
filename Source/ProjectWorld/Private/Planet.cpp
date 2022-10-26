@@ -38,7 +38,7 @@ void APlanet::Tick(float DeltaTime)
 void APlanet::CreatePlanet()
 {	
 	// Clamping Global Value
-	MyCharacterPos = MyCharacterPos.BoundToCube(PlanetRadius);
+	MyCharacterPos = ProjectToCubeTowardsCenter(MyCharacterPos, PlanetRadius);
 	LoadDistance = FMath::Clamp(LoadDistance, 10000, PlanetRadius * 2);
 
 	// Clear Planet
@@ -296,12 +296,44 @@ FRotator APlanet::MyCharacterPosToPlanetSideRotation()
 
 FVector APlanet::ProjectToCubeTowardsCenter(const FVector Vector, const int32 CubeRadius)
 {
+
+	// Front
 	if (Vector.X >= FMath::Abs(Vector.Y) && Vector.X >= FMath::Abs(Vector.Z))
 	{
 		return (FVector(1, Vector.Y / Vector.X, Vector.Z / Vector.X) * CubeRadius);
 	}
-	else
+
+	// Back
+	if (-Vector.X >= FMath::Abs(Vector.Y) && -Vector.X >= FMath::Abs(Vector.Z))
 	{
-		return FVector().ZeroVector;
+		return (FVector(1, Vector.Y / Vector.X, Vector.Z / Vector.X) * -CubeRadius);
+		//return FVector(-PlanetRadius, 0, 0);
 	}
+
+	// Left
+	if (Vector.Y >= FMath::Abs(Vector.X) && Vector.Y >= FMath::Abs(Vector.Z))
+	{
+		return (FVector(Vector.X / Vector.Y, 1, Vector.Z / Vector.Y) * CubeRadius);
+	}
+
+	// Right
+	if (-Vector.Y >= FMath::Abs(Vector.X) && -Vector.Y >= FMath::Abs(Vector.Z))
+	{
+		return (FVector(Vector.X / Vector.Y, 1, Vector.Z / Vector.Y) * -CubeRadius);
+	}
+
+	// Up
+	if (Vector.Z >= FMath::Abs(Vector.X) && Vector.Z >= FMath::Abs(Vector.Y))
+	{
+		return (FVector(Vector.X / Vector.Z, Vector.Y / Vector.Z, 1) * CubeRadius);
+	}
+
+	// Down
+	if (-Vector.Z >= FMath::Abs(Vector.X) && -Vector.Z >= FMath::Abs(Vector.Y))
+	{
+		return (FVector(Vector.X / Vector.Z, Vector.Y / Vector.Z, 1) * -CubeRadius);
+	}
+	
+	// Default
+	return FVector().ZeroVector;	
 }
