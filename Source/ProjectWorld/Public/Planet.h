@@ -38,7 +38,7 @@ private:
 
 	void CreatePlanet();
 	int32 RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPosition, const int32 PlanetSideIndex, const float QuadRadius, const int32 MaxSubdivision, const int32 CurentSubdivision, int32 VertexCount);
-	int32 CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex);
+	int32 CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const int32 ChunkSubdivision, const int32 StartVertexIndex);
 	void ClearPlanet();
 
 	int32 GetMaxPlanetSubdivisionByLoadDistance(const FVector2D QuadPosition, const float QuadRadius);

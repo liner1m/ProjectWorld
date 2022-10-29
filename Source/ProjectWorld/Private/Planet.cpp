@@ -54,7 +54,17 @@ void APlanet::CreatePlanet()
 	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(0, X2PlanetRadius), 1, PlanetRadius, PlanetSubdivision, 0, VertexCount); // Top
 	VertexCount = RecursiveQuadTreePlanetMeshGeneration(FVector2D(0, -X2PlanetRadius), 5, PlanetRadius, PlanetSubdivision, 0, VertexCount); // Down
 
+	// Debug
+	//CreateChunk(FVector2D().ZeroVector, 3, PlanetRadius, 0, 0);
+
+	// Create Mesh
 	ProceduralMesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVs, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+
+	// Add Material
+	if (Material)
+	{
+		ProceduralMesh->SetMaterial(0, Material);
+	}
 
 	//Debug
 	//for (auto& el : Vertices)
@@ -107,13 +117,13 @@ int32 APlanet::RecursiveQuadTreePlanetMeshGeneration(const FVector2D QuadPositio
 	}
 	else
 	{
-		VertexCount = CreateChunk(QuadPosition, PlanetSideIndex, QuadRadius, 999, VertexCount);
+		VertexCount = CreateChunk(QuadPosition, PlanetSideIndex, QuadRadius, CurentSubdivision - 1, VertexCount);
 	}
 
 	return VertexCount;
 }
 
-int32 APlanet::CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const float ChunkSubdivision, const int32 StartVertexIndex)
+int32 APlanet::CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSideIndex, const float ChunkRadius, const int32 ChunkSubdivision, const int32 StartVertexIndex)
 {
 	FVector Vertex0 = FVector(0, ChunkPosition.X + ChunkRadius, ChunkPosition.Y - ChunkRadius);
 	FVector Vertex1 = FVector(0, ChunkPosition.X - ChunkRadius, ChunkPosition.Y - ChunkRadius);
@@ -183,6 +193,14 @@ int32 APlanet::CreateChunk(const FVector2D ChunkPosition, const int32 PlanetSide
 	Triangles.Add(StartVertexIndex + 1); //
 	Triangles.Add(StartVertexIndex + 3); // Right
 	Triangles.Add(StartVertexIndex + 2); //
+
+	// Create UVs
+	int32 UVScale = FMath::Pow(2, PlanetSubdivision - ChunkSubdivision);
+
+	UVs.Add(FVector2D(0, 0));
+	UVs.Add(FVector2D(0, UVScale));
+	UVs.Add(FVector2D(UVScale, 0));
+	UVs.Add(FVector2D(UVScale, UVScale));
 
 	return StartVertexIndex + 4;
 }
